@@ -1,0 +1,104 @@
+/* General styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container-fluid {
+    padding: 20px;
+}
+
+.header-content {
+    background-color: #4A90E2;
+    padding: 20px;
+    color: white;
+    text-align: center;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}
+
+input, select, button {
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #28a745;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Zoom button styling */
+.zoom-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    margin: 5px;
+    padding: 10px;
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.zoom-button:hover {
+    background-color: #357ABD;
+}
+
+/* Customization Panel Styling */
+#customization-panel {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+#customization-panel h2 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+/* Footer styling */
+footer {
+    background-color: #4A90E2;
+    padding: 10px;
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* File upload message styling */
+#file-upload-message {
+    font-style: italic;
+    color: green;
+    margin-top: 10px;
+}

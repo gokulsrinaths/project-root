@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Flow Betweenness Calculator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container-fluid {
+            padding: 20px;
+        }
+        .header-content {
+            background-color: #4A90E2;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .zoom-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .zoom-button:hover {
+            background-color: #357ABD;
+        }
+        #customization-panel {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        footer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            margin-top: auto;
+            color: #666;
+        }
+        .file-upload-message {
+            font-style: italic;
+            color: green;
+            margin-top: 10px;
+        }
+        #layout-options {
+            margin-top: 15px;
+        }
+        #button-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 20px;
+        }
+        #generate-report-button {
+            margin-right: 10px;
+        }
+        /* Instructions Popup */
+        #instruction-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+        }
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header class="header-content">
+        <h1>Current Flow Betweenness Calculator</h1>
+        <h6 style="position: absolute; bottom: 10px; right: 10px;">By Gokul Srinath Seetha Ram</h6>
+        <button id="info-button" class="btn btn-info" style="position: absolute; top: 10px; right: 10px;">How to Use</button>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <form id="upload-form" enctype="multipart/form-data">
+                    <div class="input-group mb-3">
+                        <input type="file" id="file-upload" name="file" accept=".csv" class="form-control">
+                        <div class="input-group-append">
+                            <button id="upload-button" class="btn btn-secondary">Upload CSV</button>
+                        </div>
+                    </div>
+                    <small id="upload-status" class="form-text text-muted"></small>
+                </form>
+
+                <!-- Node Selection -->
+                <div id="node-selection" style="display:none;">
+                    <label for="source-node" class="mt-4">Select Source Node:</label>
+                    <select id="source-node" name="source-node" class="form-control"></select>
+
+                    <label for="sink-node" class="mt-2">Select Sink Node:</label>
+                    <select id="sink-node" name="sink-node" class="form-control"></select>
+
+                    <button id="calculate-button" class="btn btn-primary mt-3">Calculate Betweenness</button>
+                </div>
+
+                <!-- Layout Options -->
+                <div id="layout-options" style="display:none;">
+                    <label for="layout-selection">Select Layout Algorithm:</label>
+                    <select id="layout-selection" class="form-control">
+                        <option value="default">Default</option>
+                        <option value="hierarchical">Hierarchical</option>
+                        <option value="radial">Radial</option>
+                        <option value="grid">Grid</option>
+                    </select>
+                </div>
+
+                <div id="result" style="display:none;" class="mt-4">
+                    <h2>Betweenness Scores</h2>
+                    <table class="table" cellpadding="10">
+                        <thead>
+                            <tr>
+                                <th scope="col">Edge</th>
+                                <th scope="col">Betweenness Score</th>
+                                <th scope="col">Weight</th>
+                                <th scope="col">Color</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-table-body">
+                            <!-- Results will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Network Visualization Container -->
+                <div id="network-container" style="position: relative;">
+                    <div id="network-controls" class="mt-2" style="display: flex; justify-content: flex-end;"></div>
+                    <div id="network" style="width: 100%; height: 600px; border: 1px solid lightgray; margin-top: 20px; position: relative;"></div>
+                    <!-- Zoom buttons -->
+                    <button id="zoom-in-button" class="zoom-button">+</button>
+                    <button id="zoom-out-button" class="zoom-button" style="right: 80px;">-</button>
+                </div>
+
+                <!-- Button Container -->
+                <div id="button-container">
+                    <button id="generate-report-button" class="btn btn-info" style="display:none;">Generate Report</button>
+                    <button id="export-image-button" class="btn btn-secondary" style="display:none;">Export as Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 Current Flow Betweenness Calculator. All rights reserved. <br> By Gokul Srinath Seetha Ram</p>
+    </footer>
+
+    <!-- Instruction Popup -->
+    <div id="instruction-popup">
+        <span class="popup-close">&times;</span>
+        <h3>How to Use the Current Flow Betweenness Calculator</h3>
+        <p>Follow these steps to analyze your network:</p>
+        <ol>
+            <li>Upload a CSV file with your network data (columns: source, target, weight).</li>
+            <li>Select the source and sink nodes.</li>
+            <li>Click "Calculate Betweenness" to compute the betweenness scores.</li>
+            <li>Use the "Generate Report" button to download a PDF report.</li>
+            <li>Use the "Export as Image" button to save the network visualization as an image.</li>
+        </ol>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='script1.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
+</body>
+</html>
