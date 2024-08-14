@@ -274,20 +274,24 @@ function removeEdgeHighlight(edgeId, row) {
     const resultTable = document.querySelector('#result table'); // Select the table itself
 
     if (edge) {
-        // Remove the edge entirely
-        network.body.data.edges.remove(edgeId);
-        network.body.data.edges.remove(reverseEdgeId);  // Remove reverse edge as well
-
-        // Re-add the edge without the label
-        network.body.data.edges.add({
+        // Preserve the weight and other properties
+        const edgeProperties = {
             id: edgeId,
             from: edge.from,
             to: edge.to,
+            weight: edge.weight,  // Preserve weight
             color: { color: '#848484' },  // Reset color
             width: 1,  // Reset width
             label: null,  // Ensure no label is present
             title: `Weight: ${edge.weight}` // Tooltip with weight
-        });
+        };
+
+        // Remove the edge entirely
+        network.body.data.edges.remove(edgeId);
+        network.body.data.edges.remove(reverseEdgeId);  // Remove reverse edge as well
+
+        // Re-add the edge with preserved properties
+        network.body.data.edges.add(edgeProperties);
 
         // Remove the edge from the set of added edges
         addedEdges.delete(edgeId);
@@ -303,6 +307,7 @@ function removeEdgeHighlight(edgeId, row) {
         resultSection.style.display = 'none'; // Hide the section
     }
 }
+
 
 function changeEdgeColor(edgeId, color) {
     network.body.data.edges.update({
