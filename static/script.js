@@ -79,7 +79,7 @@ function visualizeNetwork(nodes, edges) {
     const nodeData = nodes.map(node => ({ id: node, label: `Node ${node}`, color: '#ff9999' })); // Set initial node color
     const edgeData = edges.map(edge => {
         return {
-            id: `${edge.source}-${edge.target}`, // Unique ID for each edge
+            id: getEdgeId(edge.source, edge.target), // Unique ID for each edge
             from: edge.source,
             to: edge.target,
             font: { align: 'top' },
@@ -178,8 +178,9 @@ document.getElementById('calculate-button').addEventListener('click', function()
     }
 
     sinks.forEach(sink => {
-        const edgeId = `${source}-${sink}`;
-        if (addedEdges.has(edgeId)) {
+        const edgeId = getEdgeId(source, sink);
+        const reverseEdgeId = getEdgeId(sink, source);  // Consider reverse edge
+        if (addedEdges.has(edgeId) || addedEdges.has(reverseEdgeId)) {
             alert(`Edge ${edgeId} has already been added.`);
         } else {
             const sinkParams = sinks.map(sink => `sink=${sink}`).join('&');
@@ -204,6 +205,7 @@ document.getElementById('calculate-button').addEventListener('click', function()
 
                 // Add edge ID to the set of added edges
                 addedEdges.add(edgeId);
+                addedEdges.add(reverseEdgeId);  // Add reverse edge as well
 
                 // Show the "Generate Report" and "Export as Image" buttons
                 document.getElementById('generate-report-button').style.display = 'block';
@@ -213,6 +215,10 @@ document.getElementById('calculate-button').addEventListener('click', function()
         }
     });
 });
+
+function getEdgeId(source, target) {
+    return [source, target].sort().join('-');  // Sort to ensure uniqueness regardless of direction
+}
 
 function addResultToDisplay(results) {
     const resultsTableBody = document.getElementById('results-table-body');
@@ -262,6 +268,7 @@ function highlightEdges(results) {
 function removeEdgeHighlight(edgeId, row) {
     // Get the current edge data
     const edge = network.body.data.edges.get(edgeId);
+    const reverseEdgeId = getEdgeId(edge.to, edge.from);  // Consider reverse edge
     const resultsTableBody = document.getElementById('results-table-body');
     const resultSection = document.getElementById('result');
     const resultTable = document.querySelector('#result table'); // Select the table itself
@@ -269,6 +276,7 @@ function removeEdgeHighlight(edgeId, row) {
     if (edge) {
         // Remove the edge entirely
         network.body.data.edges.remove(edgeId);
+        network.body.data.edges.remove(reverseEdgeId);  // Remove reverse edge as well
 
         // Re-add the edge without the label
         network.body.data.edges.add({
@@ -283,6 +291,7 @@ function removeEdgeHighlight(edgeId, row) {
 
         // Remove the edge from the set of added edges
         addedEdges.delete(edgeId);
+        addedEdges.delete(reverseEdgeId);  // Delete reverse edge as well
     }
 
     // Remove the row from the table
@@ -477,3 +486,4 @@ function updateVisualization() {
     network.stabilize();
     adjustEdgeThicknessBasedOnWeightOrBetweenness();
 }
+
