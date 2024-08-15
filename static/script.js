@@ -418,17 +418,39 @@ document.getElementById('generate-report-button').addEventListener('click', func
 });
 
 // Export network as an image
+// Export network as an image with higher quality
+// Export network as an image with higher quality
 document.getElementById('export-image-button').addEventListener('click', function () {
     const canvas = network.canvas.frame.canvas;
-    const dataUrl = canvas.toDataURL('image/png');
+
+    // Create a temporary canvas to increase the resolution
+    const scaleFactor = 6;  // Increase this value for higher resolution
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width * scaleFactor; // Increase the width
+    tempCanvas.height = canvas.height * scaleFactor; // Increase the height
+
+    const ctx = tempCanvas.getContext('2d');
+    ctx.scale(scaleFactor, scaleFactor); // Scale the context to increase resolution
+
+    // Set the background to white
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // Draw the original canvas onto the temporary canvas
+    ctx.drawImage(canvas, 0, 0);
+
+    // Get the high-resolution image as a data URL
+    const dataUrl = tempCanvas.toDataURL('image/png', 1.0); // 1.0 indicates maximum quality
 
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = 'network_visualization.png';
+    link.download = 'network_visualization_high_quality.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 });
+
+
 
 // Customizable node and edge colors
 function setColorScheme(nodeColor, edgeColor) {
